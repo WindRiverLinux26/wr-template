@@ -51,3 +51,17 @@ def templates_to_fragments(d):
 
     wr_fragments_value = " ".join(wr_fragments_list)
     return wr_fragments_value
+
+def default_bsp_fragment(d):
+    def machine_exits_in_layer(machine, layer):
+        machine_conf_path = "%s/conf/machine/%s.conf" % (layer, machine)
+        return os.path.exists(machine_conf_path)
+
+    bblayers = d.getVar("BBLAYERS").split()
+    machine = d.getVar("MACHINE")
+    for layer in bblayers:
+        if machine_exits_in_layer(machine, layer):
+            if os.path.exists("%s/conf/fragments/default/bsp.conf" % layer):
+                layerid = bb.utils.get_file_layer(layer + '/', d)
+                return "%s/default/bsp" % layerid
+    return ""
