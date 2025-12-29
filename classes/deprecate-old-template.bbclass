@@ -28,6 +28,6 @@ python deprecate_old_template_eventhandler () {
         if possible_templates:
             msg = f"Layer {layer} contains templates in a deprecated format: {possible_templates}\n"
             msg += f"If this is deliberate, add {layerid} to LAYERS_SKIP_OLD_TEMPLATE_CHECKING.\n"
-            msg += f"Otherwise, please run 'layers/wrlinux/scripts/convert-to-fragments {layer}' to convert the templates.\n"
+            msg += f"Otherwise, please run 'layers/wrlinux/scripts/convert-to-fragments.py {layer}' to convert the templates.\n"
             bb.fatal(msg)
 }
