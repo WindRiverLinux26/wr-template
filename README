@@ -5,45 +5,32 @@ This layer provides template processing support for OpenEmbedded.  Wind River
 templates are a mechanism that permit various configurations to be enabled
 with a simple setting.
 
+The implementation uses bitbake's native config fragment support as the
+backend.  WRTEMPLATE values are mapped to OE_FRAGMENTS values, so users can
+continue to use WRTEMPLATE in the same way as before.
+
 
 What is a template?
 -------------------
-A template lives in the 'templates' directory of a given layer.  The templates
-directory contains a series of directories to organize the templates.  The name
-of the directory is used to enable the template.  The 'default' directory will
-cause that template to be included by default even if the user has not
-specified it.
+A template lives in the 'conf/fragments' directory of a given layer.  The
+conf/fragments directory contains a series of directories to organize the
+templates.  The name of the directory is used to enable the template.
 
 A template directory may contain:
    README - a template README file
+   <name>.conf - a configuration fragment (where <name> is the directory's
+                 basename, e.g. conf/fragments/feature/foo/foo.conf)
    require - a list of other templates required for this one
-   template.conf - a template configuration fragment
-   image.inc - an image fragment
-   bsp-pkgs.conf - a BSP specific configuration fragment
-   bsp-pkgs.inc - a BSP specific image fragment
-
-The README is a plain text file that will be copied to a generated
-README_templates file in the user's TOPDIR.  This allows a user to see
-all README information for each template they have selected.
 
 The require file may include comments, starting with a '#' or template names
-to include.
+to include.  Circular dependencies are handled gracefully and duplicate
+entries are avoided.
 
-The template.conf file contains various configuration variables that would
-normally be placed in local.conf (or another similar '.conf' file) by the user.
-
-The image.inc file contains various image recipe specific variables.  The
-variables here are typically added to a recipe (.bb) or bbappend file.
-
-The bsp-pkgs.conf and bsp-pkgs.inc files are only loaded if the user is
-compiling a BSP that is defined in that layer.  The bsp-pkgs.conf is equivalent
-to the template.conf file, while the bsp-pkgs.inc is equivalent to the
-image.inc file.
-Note: Parent layer's bsp-pkgs.conf and bsp-pkgs.inc in templates can be
-      included by sublayer, for example, parent's templates/default/bsp-pkgs.conf
-      and templates/default/bsp-pkgs.inc will be included by sublayer when
-      there is no default template in sublayer, the similar to other
-      templates.
+BSP layers can provide a default configuration fragment at
+<layer>/conf/fragments/default/bsp.conf.  This fragment is automatically
+loaded when the MACHINE is defined in that layer, providing BSP-specific
+default configuration.  The BSP_FRAGMENTS variable controls this and can
+be overridden if needed.
 
 In addition, the layer allows the templates to set various banner messages.
 
@@ -53,6 +40,20 @@ In addition, the layer allows the templates to set various banner messages.
 A configuration banner is only displayed if bitbake has to reparse the
 configuration.  A runtime banner will always be displayed when a 
 build is run.
+
+
+Old template format deprecation
+--------------------------------
+The old template format (using a 'templates' directory with template.conf,
+image.inc, bsp-pkgs.conf, bsp-pkgs.inc, and README files) is deprecated.
+If a layer still contains old-format templates, a fatal error will be raised
+during configuration parsing.  To convert old templates to the new format, run:
+
+    layers/wrlinux/scripts/convert-to-fragments.py <layer>
+
+To temporarily suppress the error for specific layers, set:
+
+    LAYERS_SKIP_OLD_TEMPLATE_CHECKING = "layerid1 layerid2"
 
 
 Dependencies
