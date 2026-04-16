@@ -44,7 +44,7 @@ def templates_to_fragments(d):
             for rt in required_templates:
                 extend_fragments_list(rt, required_by=template)
 
-    # append OE_FRAGMENTS value according to WRTEMPLATE2 setting
+    # append OE_FRAGMENTS value according to WRTEMPLATE setting
     templates = (d.getVar("WRTEMPLATE") or "").split()
     for template in templates:
         extend_fragments_list(template)
@@ -53,14 +53,14 @@ def templates_to_fragments(d):
     return wr_fragments_value
 
 def default_bsp_fragment(d):
-    def machine_exits_in_layer(machine, layer):
+    def machine_exists_in_layer(machine, layer):
         machine_conf_path = "%s/conf/machine/%s.conf" % (layer, machine)
         return os.path.exists(machine_conf_path)
 
     bblayers = d.getVar("BBLAYERS").split()
     machine = d.getVar("MACHINE")
     for layer in bblayers:
-        if machine_exits_in_layer(machine, layer):
+        if machine_exists_in_layer(machine, layer):
             if os.path.exists("%s/conf/fragments/default/bsp.conf" % layer):
                 layerid = bb.utils.get_file_layer(layer + '/', d)
                 return "%s/default/bsp" % layerid
